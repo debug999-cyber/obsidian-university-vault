@@ -1,0 +1,18 @@
+# Медиафайлы (тяжёлые)
+*.png
+*.jpg
+*.m4a
+*.mp3
+*.mp4
+
+# Whisper модели (огромные!)
+.obsidian/plugins/audio-transcription/models/
+.obsidian/plugins/audio-transcription/bin/
+
+# Системное
+.obsidian/workspace.json
+.trash/
+.space/
+
+# Личные данные — ВАЖНО!
+30-Личное/Разное/2026-05-24 — Почта и пароль от стим.md

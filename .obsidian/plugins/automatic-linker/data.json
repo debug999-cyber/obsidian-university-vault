@@ -1,0 +1,31 @@
+{
+  "formatOnSave": true,
+  "showNotice": false,
+  "respectNewFileFolderPath": true,
+  "includeAliases": true,
+  "proximityBasedLinking": true,
+  "ignoreDateFormats": true,
+  "ignoreHeadings": true,
+  "formatGitHubURLs": false,
+  "githubEnterpriseURLs": [],
+  "formatJiraURLs": false,
+  "jiraURLs": [],
+  "formatLinearURLs": false,
+  "debug": false,
+  "ignoreCase": true,
+  "matchSentenceCase": true,
+  "replaceUrlWithTitle": true,
+  "replaceUrlWithTitleIgnoreDomains": [],
+  "excludeDirsFromAutoLinking": [
+    "50-Система, 99-Архив, 00-Inbox"
+  ],
+  "preventSelfLinking": true,
+  "removeAliasInDirs": [],
+  "runLinterAfterFormatting": false,
+  "runPrettierAfterFormatting": false,
+  "formatDelayMs": 1,
+  "aiEnabled": false,
+  "aiEndpoint": "http://localhost:1234/v1",
+  "aiModel": "gemma-4-7b",
+  "aiMaxContext": 500
+}

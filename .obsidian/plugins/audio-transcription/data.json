@@ -1,0 +1,27 @@
+{
+  "processingMode": "local",
+  "modelSize": "small",
+  "language": "auto",
+  "favoriteLanguages": [
+    "auto",
+    "en",
+    "ru"
+  ],
+  "enableDiarization": false,
+  "speakerCount": 2,
+  "customInstructions": "",
+  "openaiApiKey": "",
+  "groqApiKey": "",
+  "groqModel": "whisper-large-v3-turbo",
+  "openrouterApiKey": "",
+  "openrouterModelName": "meta-llama/llama-3.2-3b-instruct",
+  "outputFolder": "",
+  "includeTimestamps": true,
+  "autoCreateTags": true,
+  "skipIfAnalyzed": true,
+  "deleteAudioAfterTranscription": false,
+  "dateFormat": "iso",
+  "ribbonIcon": "audio-lines",
+  "recentTranscriptions": [],
+  "maxRecentTranscriptions": 10
+}
