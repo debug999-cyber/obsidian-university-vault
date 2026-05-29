@@ -1,0 +1,1224 @@
+/* ═════════════════════════════════════════════════════════════════════════════
+   UNIVERSITY DASHBOARD SYSTEM v5.0
+   Professional UI + Unified Enterprise Card Language
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   БЛОК 1: БАЗОВЫЕ ТОКЕНЫ (Design Tokens)
+   ---------------------------------------------------------------------------
+   Все цвета, отступы, шрифты и тени централизованы здесь.
+   Чтобы изменить визуал — меняй только эту секцию.
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.university-dashboard,
+.dv-container:has(.ud-card) {
+  /* ── Цветовая палитра (Nord-подобная) ── */
+  --ud-red:     #bf616a;
+  --ud-orange:  #d08770;
+  --ud-yellow:  #ebcb8b;
+  --ud-green:   #a3be8c;
+  --ud-teal:    #88c0d0;
+  --ud-blue:    #5e81ac;
+  --ud-purple:  #b48ead;
+  --ud-frost:   #8fbcbb;
+
+  /* ── Статусные цвета ── */
+  --ud-status-overdue: #ff453a;
+  --ud-status-today:  #ff9500;
+  --ud-status-soon:   #ffcc00;
+  --ud-status-ok:     #30d158;
+  --ud-status-done:   #30d158;
+  --ud-status-work:   #64d2ff;
+  /* Добавить новый статус: скопируй строку выше, замени имя и hex */
+
+  /* ── Фоны ── */
+  --ud-bg-card:  var(--background-primary);
+  --ud-bg-hover: var(--background-modifier-hover);
+  --ud-bg-pill:  var(--background-modifier-form-field);
+
+  /* ── Отступы (4px сетка) ── */
+  --ud-space-1: 4px;
+  --ud-space-2: 8px;
+  --ud-space-3: 12px;
+  --ud-space-4: 16px;
+  --ud-space-5: 20px;
+  --ud-space-6: 24px;
+
+  /* ── Типографика ── */
+  --ud-font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --ud-font-mono: "JetBrains Mono", "SF Mono", "Fira Code", monospace;
+  --ud-text-xs:   0.72em;
+  --ud-text-sm:   0.82em;
+  --ud-text-base: 0.95em;
+  --ud-text-lg:   1.05em;
+
+  /* ── Скругления и тени ── */
+  --ud-radius-sm: 4px;
+  --ud-radius-md: 6px;
+  --ud-radius-lg: 10px;
+  --ud-shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --ud-shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+  --ud-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Переопределения для тёмной темы ── */
+.theme-dark .university-dashboard,
+.theme-dark .dv-container:has(.ud-card) {
+  --ud-status-overdue: #ff6b6b;
+  --ud-status-today:   #ffa94d;
+  --ud-status-soon:    #ffd43b;
+  --ud-status-ok:      #69db7c;
+  --ud-status-done:    #69db7c;
+  --ud-status-work:    #74c0fc;
+
+  --ud-shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+  --ud-shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   БЛОК 2: НЕЙТРАЛЬНЫЕ МАРКЕРЫ
+   ---------------------------------------------------------------------------
+   Декоративные emoji и внешние иконочные шрифты не используются.
+   Для навигации применяются текстовые коды и CSS-индикаторы.
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.ud-icon {
+  font-family: var(--ud-font-sans);
+  font-weight: normal;
+  font-style: normal;
+  font-size: 1.5em;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  transition: font-variation-settings 0.2s ease;
+}
+
+.ud-icon-filled {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   БЛОК 3: СКРОЛЛБАР
+   ---------------------------------------------------------------------------
+   Тонкий кастомный скроллбар для контейнеров дашборда.
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.university-dashboard ::-webkit-scrollbar,
+.dv-container ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.university-dashboard ::-webkit-scrollbar-track,
+.dv-container ::-webkit-scrollbar-track {
+  background: transparent;
+}
+.university-dashboard ::-webkit-scrollbar-thumb,
+.dv-container ::-webkit-scrollbar-thumb {
+  background: var(--background-modifier-border);
+  border-radius: 10px;
+}
+.university-dashboard ::-webkit-scrollbar-thumb:hover,
+.dv-container ::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   БЛОК 4: ЗАГОЛОВКИ СЕКЦИЙ (ud-section)
+   ---------------------------------------------------------------------------
+   Используется в MOC и других списках: цветная точка + название + счётчик.
+   Цвет точки задаётся inline-стилем через JS: --ud-color.
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.ud-section {
+  margin-top: var(--ud-space-6);
+  margin-bottom: var(--ud-space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--ud-space-2);
+  user-select: none;
+}
+.ud-section:first-child {
+  margin-top: var(--ud-space-3);
+}
+.ud-section-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--ud-color, var(--text-muted));
+}
+.ud-section-title {
+  font-weight: 600;
+  font-size: var(--ud-text-lg);
+  color: var(--text-normal);
+  letter-spacing: 0.01em;
+}
+.ud-section-count {
+  font-size: var(--ud-text-xs);
+  background: var(--ud-bg-pill);
+  color: var(--text-muted);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   БЛОК 5: УНИФИЦИРОВАННАЯ КАРТОЧКА (ud-card)
+   ---------------------------------------------------------------------------
+   Горизонтальная карточка с левой акцентной полосой.
+   Используется в: MOC, Дедлайны, Предметы, Поиск.
+
+   Как добавить новый статус:
+   1. Добавь CSS-переменную в Блок 1 (--ud-status-xxx)
+   2. Добавь класс .ud-pill-xxx в Блок 5 (ниже)
+   3. В JS используй pillClass = "ud-pill-xxx"
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.ud-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ud-space-2);
+}
+
+.ud-card {
+  display: flex;
+  align-items: center;
+  gap: var(--ud-space-3);
+  padding: var(--ud-space-3) var(--ud-space-4);
+  border-radius: var(--ud-radius-md);
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-modifier-form-field);
+  transition: var(--ud-transition);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+}
+.theme-dark .ud-card {
+  background: rgba(255,255,255,0.03);
+  border-color: rgba(255,255,255,0.06);
+}
+
+/* Левый акцентный градиент */
+.ud-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--ud-border-color, transparent) 0%, transparent 8%);
+  opacity: 0.04;
+  pointer-events: none;
+}
+/* Левая цветная полоса */
+.ud-card::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--ud-border-color, var(--background-modifier-border));
+  border-radius: var(--ud-radius-md) 0 0 var(--ud-radius-md);
+}
+
+.ud-card:hover {
+  background: var(--ud-bg-hover);
+  transform: translateX(2px);
+  box-shadow: var(--ud-shadow-sm);
+  border-color: var(--text-muted);
+}
+.ud-card:active {
+  transform: translateX(1px);
+}
+
+/* ── Контент карточки ── */
+.ud-card-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ud-space-1);
+}
+.ud-card-link {
+  font-weight: 500;
+  color: var(--text-accent);
+  text-decoration: none;
+  font-size: var(--ud-text-base);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  line-height: 1.4;
+}
+.ud-card-link:hover {
+  text-decoration: underline;
+}
+.ud-card-meta {
+  display: flex;
+  gap: var(--ud-space-1);
+  flex-wrap: wrap;
+}
+.ud-card-tag {
+  font-size: var(--ud-text-xs);
+  color: var(--text-muted);
+  background: var(--ud-bg-pill);
+  padding: 1px 6px;
+  border-radius: var(--ud-radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-weight: 500;
+}
+
+/* ── Блок даты ── */
+.ud-date-block {
+  min-width: 110px;
+  text-align: right;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ud-date-main {
+  font-size: var(--ud-text-base);
+  color: var(--text-normal);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.ud-date-sub {
+  font-size: var(--ud-text-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+  font-weight: 400;
+}
+.ud-date-sub.ud-urgent {
+  color: var(--ud-status-overdue);
+  font-weight: 600;
+}
+.ud-date-sub.ud-soon {
+  color: var(--ud-status-soon);
+  font-weight: 500;
+}
+.ud-date-sub.ud-today {
+  color: var(--ud-status-today);
+  font-weight: 600;
+}
+
+/* ── Статус-пилюля ── */
+.ud-status-block {
+  min-width: 90px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.ud-pill {
+  display: inline-block;
+  font-size: var(--ud-text-xs);
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--ud-radius-sm);
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+/* Шаблон для новой пилюли:
+   .ud-pill-xxx {
+     background: rgba(R,G,B,0.12);
+     color: var(--ud-status-xxx);
+   }
+   .theme-dark .ud-pill-xxx {
+     background: rgba(R,G,B,0.15);
+   }
+*/
+
+.ud-pill-done {
+  background: rgba(48, 209, 88, 0.12);
+  color: var(--ud-status-done);
+}
+.theme-dark .ud-pill-done {
+  background: rgba(105, 219, 124, 0.15);
+}
+.ud-pill-overdue {
+  background: rgba(255, 69, 58, 0.12);
+  color: var(--ud-status-overdue);
+}
+.theme-dark .ud-pill-overdue {
+  background: rgba(255, 107, 107, 0.15);
+}
+.ud-pill-today {
+  background: rgba(255, 149, 0, 0.12);
+  color: var(--ud-status-today);
+}
+.theme-dark .ud-pill-today {
+  background: rgba(255, 169, 77, 0.15);
+}
+.ud-pill-soon {
+  background: rgba(255, 204, 0, 0.12);
+  color: #d4a017;
+}
+.theme-dark .ud-pill-soon {
+  background: rgba(255, 212, 59, 0.15);
+  color: #ffd43b;
+}
+.ud-pill-ok {
+  background: rgba(48, 209, 88, 0.12);
+  color: var(--ud-status-ok);
+}
+.theme-dark .ud-pill-ok {
+  background: rgba(105, 219, 124, 0.15);
+}
+.ud-pill-work {
+  background: rgba(100, 210, 255, 0.12);
+  color: var(--ud-status-work);
+}
+.theme-dark .ud-pill-work {
+  background: rgba(116, 192, 252, 0.15);
+}
+
+/* ── Кнопка действия ── */
+.ud-btn-block {
+  flex-shrink: 0;
+}
+.ud-btn {
+  font-size: var(--ud-text-xs);
+  padding: 4px 10px;
+  border-radius: var(--ud-radius-sm);
+  border: 1px solid var(--background-modifier-border);
+  cursor: pointer;
+  background: var(--background-secondary);
+  color: var(--text-muted);
+  transition: var(--ud-transition);
+  font-family: var(--ud-font-sans);
+  font-weight: 500;
+}
+.ud-btn:hover {
+  background: var(--ud-bg-hover);
+  color: var(--text-normal);
+  border-color: var(--text-muted);
+}
+.ud-btn:active {
+  transform: scale(0.96);
+}
+
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   БЛОК 6: АККОРДЕОН (ud-done-toggle / ud-done-list)
+   ---------------------------------------------------------------------------
+   Сворачиваемая секция. Используется для:
+   • «Выполнено» в дедлайнах
+   • «Требуют внимания» на рабочем столе
+   • «Предметы» на рабочем столе
+
+   Переключение visibility через CSS-класс .open (добавляется JS).
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.ud-done-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--ud-space-2);
+  cursor: pointer;
+  user-select: none;
+  margin-top: var(--ud-space-3);
+  margin-bottom: var(--ud-space-2);
+  padding: var(--ud-space-3) var(--ud-space-4);
+  border-radius: var(--ud-radius-md);
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-modifier-form-field);
+  backdrop-filter: blur(8px);
+  transition: var(--ud-transition);
+  position: relative;
+  overflow: hidden;
+}
+.theme-dark .ud-done-toggle {
+  background: rgba(255,255,255,0.03);
+  border-color: rgba(255,255,255,0.06);
+}
+.ud-done-toggle:hover {
+  background: var(--ud-bg-hover);
+  border-color: var(--text-muted);
+  transform: translateY(-1px);
+  box-shadow: var(--ud-shadow-sm);
+}
+
+/* ── Иконки через CSS ::before (без JS) ── */
+.ud-done-toggle[data-toggle="urgent"] .ud-done-label::before {
+  content: "notification_important";
+  font-family: var(--ud-font-sans);
+  font-size: 1.3em;
+  color: var(--text-muted);
+  margin-right: 8px;
+  vertical-align: middle;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  transition: var(--ud-transition);
+}
+.ud-done-toggle[data-toggle="urgent"]:hover .ud-done-label::before {
+  color: var(--text-normal);
+  font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+}
+
+.ud-done-toggle[data-toggle="subjects"] .ud-done-label::before {
+  content: "school";
+  font-family: var(--ud-font-sans);
+  font-size: 1.3em;
+  color: var(--text-muted);
+  margin-right: 8px;
+  vertical-align: middle;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  transition: var(--ud-transition);
+}
+.ud-done-toggle[data-toggle="subjects"]:hover .ud-done-label::before {
+  color: var(--text-normal);
+  font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+}
+
+.ud-done-arrow {
+  font-size: 0.7em;
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+  display: inline-block;
+  margin-right: 2px;
+}
+.ud-done-toggle.open .ud-done-arrow {
+  transform: rotate(90deg);
+}
+.ud-done-label {
+  font-weight: 600;
+  font-size: var(--ud-text-base);
+  color: var(--text-normal);
+  letter-spacing: 0.01em;
+}
+.ud-done-count {
+  font-size: var(--ud-text-xs);
+  background: var(--ud-bg-pill);
+  color: var(--text-muted);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  margin-left: auto;
+}
+
+.ud-done-list {
+  display: none;
+  flex-direction: column;
+  gap: var(--ud-space-2);
+}
+.ud-done-list.open {
+  display: flex;
+}
+
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   БЛОК 7: ПУСТОЕ СОСТОЯНИЕ (ud-empty)
+   ---------------------------------------------------------------------------
+   Плейсхолдер, когда в секции нет элементов.
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.ud-empty {
+  color: var(--text-muted);
+  margin-top: var(--ud-space-5);
+  font-style: italic;
+  font-size: var(--ud-text-base);
+  padding: var(--ud-space-4);
+  text-align: center;
+  border-radius: var(--ud-radius-md);
+  background: var(--ud-bg-pill);
+}
+
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   БЛОК 8: MOC-СПЕЦИФИКА
+   ---------------------------------------------------------------------------
+   Дополнительные стили для Map of Content (генерируемых заметок MOC).
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.ud-moc-section {
+  margin-bottom: var(--ud-space-5);
+}
+.ud-moc-header {
+  display: flex;
+  align-items: center;
+  gap: var(--ud-space-2);
+  margin-bottom: var(--ud-space-3);
+}
+.ud-moc-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ud-space-1);
+}
+
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   БЛОК 9: QUICK LINKS GRID
+   ---------------------------------------------------------------------------
+   Сетка из 4 карточек на рабочем столе (Дедлайны, Университет, Проекты, Личное).
+
+   Как добавить новую карточку:
+   1. В JS добавь объект в массив БЫСТРЫЕ_ССЫЛКИ
+   2. Здесь добавь класс .ud-quick-xxx с --ud-accent и border-left
+   3. Добавь .ud-quick-xxx .ud-icon { color: var(--ud-accent); }
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.ud-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--ud-space-3);
+  margin: var(--ud-space-4) 0 var(--ud-space-5) 0;
+}
+
+.ud-quick-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ud-space-2);
+  padding: var(--ud-space-4) var(--ud-space-3);
+  border-radius: var(--ud-radius-lg);
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-modifier-form-field);
+  transition: var(--ud-transition);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+}
+.theme-dark .ud-quick-card {
+  background: rgba(255,255,255,0.03);
+  border-color: rgba(255,255,255,0.06);
+}
+.ud-quick-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 60%, var(--ud-accent, transparent) 100%);
+  opacity: 0.08;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.ud-quick-card:hover::before {
+  opacity: 0.15;
+}
+.ud-quick-card:hover {
+  background: var(--background-modifier-hover);
+  transform: translateY(-3px);
+  box-shadow: var(--ud-shadow-md);
+  border-color: var(--text-muted);
+}
+.ud-quick-card:active {
+  transform: translateY(-1px);
+}
+.ud-quick-card .ud-icon {
+  font-size: 2em;
+  transition: var(--ud-transition);
+  color: var(--text-muted);
+}
+.ud-quick-card:hover .ud-icon {
+  color: var(--text-normal);
+  transform: scale(1.1);
+  font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+}
+.ud-quick-label {
+  font-size: var(--ud-text-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.02em;
+  transition: var(--ud-transition);
+}
+.ud-quick-card:hover .ud-quick-label {
+  color: var(--text-normal);
+}
+
+/* Акцентные цвета карточек */
+.ud-quick-deadlines { --ud-accent: var(--ud-status-overdue); border-left: 3px solid var(--ud-status-overdue); }
+.ud-quick-deadlines .ud-icon { color: var(--ud-status-overdue); }
+
+.ud-quick-uni      { --ud-accent: var(--ud-blue); border-left: 3px solid var(--ud-blue); }
+.ud-quick-uni .ud-icon      { color: var(--ud-blue); }
+
+.ud-quick-projects { --ud-accent: var(--ud-teal); border-left: 3px solid var(--ud-teal); }
+.ud-quick-projects .ud-icon { color: var(--ud-teal); }
+
+.ud-quick-personal { --ud-accent: var(--ud-purple); border-left: 3px solid var(--ud-purple); }
+.ud-quick-personal .ud-icon { color: var(--ud-purple); }
+
+/* Mobile */
+@media (max-width: 600px) {
+  .ud-quick-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .ud-quick-card {
+    padding: var(--ud-space-3) var(--ud-space-2);
+  }
+  .ud-quick-card .ud-icon {
+    font-size: 1.6em;
+  }
+}
+
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   БЛОК 10: ГРАФ (Graph View Enhancement)
+   ---------------------------------------------------------------------------
+   Подсветка MOC-узлов и дедлайнов в графе связей Obsidian.
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.graph-view.color-fill[data-path*="MOC —"] {
+  fill: var(--ud-teal) !important;
+  stroke: var(--ud-teal) !important;
+  stroke-width: 2px !important;
+}
+.graph-view.color-circle[data-path*="MOC —"] {
+  stroke: var(--ud-teal) !important;
+  stroke-width: 3px !important;
+}
+.graph-view.color-text[data-path*="MOC —"] {
+  fill: var(--ud-teal) !important;
+  font-weight: 700 !important;
+}
+.graph-view.color-fill[data-path*="Дедлайны"] {
+  fill: var(--ud-status-overdue) !important;
+}
+.graph-view.color-line[data-path*="MOC —"] {
+  stroke: var(--ud-teal) !important;
+  stroke-opacity: 0.6 !important;
+  stroke-width: 2px !important;
+}
+
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   БЛОК 11: ДОСТУПНОСТЬ И ПРОИЗВОДИТЕЛЬНОСТЬ
+   ---------------------------------------------------------------------------
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.ud-card,
+.ud-btn,
+.ud-done-toggle {
+  will-change: transform;
+}
+.ud-card:focus-visible,
+.ud-btn:focus-visible,
+.ud-card-link:focus-visible {
+  outline: 2px solid var(--text-accent);
+  outline-offset: 2px;
+}
+
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   БЛОК 12: МОБИЛЬНАЯ АДАПТАЦИЯ
+   ---------------------------------------------------------------------------
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 500px) {
+  .ud-card {
+    padding: var(--ud-space-2) var(--ud-space-3);
+    gap: var(--ud-space-2);
+  }
+  .ud-date-block {
+    min-width: 80px;
+  }
+  .ud-status-block {
+    min-width: 70px;
+  }
+  .ud-pill {
+    padding: 2px 6px;
+    font-size: 0.68em;
+  }
+  .ud-done-toggle {
+    padding: var(--ud-space-2) var(--ud-space-3);
+  }
+}
+
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   БЛОК 13: ТИПОГРАФИКА ДАШБОРДА
+   ---------------------------------------------------------------------------
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.markdown-preview-view.university-dashboard,
+.markdown-source-view.university-dashboard {
+  font-family: var(--ud-font-sans);
+  line-height: 1.65;
+}
+.university-dashboard h1,
+.university-dashboard h2,
+.university-dashboard h3 {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+.university-dashboard p {
+  line-height: 1.7;
+  margin-bottom: 1em;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   UNIVERSITY SYSTEM UI v6 PATCH
+   Единый визуальный слой для функциональных страниц: Home, MOC, индексы,
+   дедлайны, системные отчёты. Не влияет на обычные учебные заметки без класса
+   university-dashboard.
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.university-dashboard.ud-page {
+  --ud-page-gap: clamp(12px, 2vw, 20px);
+  max-width: 1120px;
+  margin-inline: auto;
+}
+
+.university-dashboard .ud-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 420px);
+  gap: var(--ud-page-gap);
+  align-items: stretch;
+  padding: clamp(16px, 3vw, 28px);
+  margin: 12px 0 18px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top left, rgba(136, 192, 208, 0.16), transparent 32%),
+    linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)),
+    var(--background-primary);
+  box-shadow: var(--ud-shadow-sm);
+  overflow: hidden;
+  position: relative;
+}
+.theme-dark .university-dashboard .ud-hero {
+  background:
+    radial-gradient(circle at top left, rgba(136, 192, 208, 0.16), transparent 35%),
+    linear-gradient(135deg, rgba(255,255,255,0.045), rgba(255,255,255,0.015));
+  border-color: rgba(255,255,255,0.075);
+}
+.university-dashboard .ud-hero h1 {
+  margin: 0 0 8px;
+  font-size: clamp(1.7rem, 4vw, 2.45rem);
+  letter-spacing: -0.035em;
+}
+.university-dashboard .ud-hero p {
+  margin: 0;
+  max-width: 70ch;
+  color: var(--text-muted);
+  font-size: 0.98rem;
+}
+
+.university-dashboard .ud-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  align-content: stretch;
+}
+.university-dashboard .ud-stat {
+  position: relative;
+  min-height: 72px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-modifier-form-field);
+  overflow: hidden;
+}
+.theme-dark .university-dashboard .ud-stat {
+  background: rgba(255,255,255,0.035);
+  border-color: rgba(255,255,255,0.06);
+}
+.university-dashboard .ud-stat::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 3px;
+  background: var(--ud-color, var(--text-accent));
+}
+.university-dashboard .ud-stat strong {
+  display: block;
+  color: var(--text-normal);
+  font-size: 1.55rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 7px;
+}
+.university-dashboard .ud-stat span {
+  color: var(--text-muted);
+  font-size: var(--ud-text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+
+.university-dashboard .ud-action-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 12px 0 16px;
+}
+.university-dashboard .ud-btn,
+.university-dashboard button.ud-btn,
+.university-dashboard .ud-pill {
+  appearance: none;
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-modifier-form-field);
+  color: var(--text-normal);
+  border-radius: 12px;
+  padding: 9px 14px;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  font: 650 var(--ud-text-base)/1.2 var(--ud-font-sans);
+  cursor: pointer;
+  transition: var(--ud-transition);
+}
+.university-dashboard .ud-btn:hover,
+.university-dashboard button.ud-btn:hover,
+.university-dashboard .ud-pill:hover {
+  background: var(--background-modifier-hover);
+  border-color: var(--text-muted);
+  transform: translateY(-1px);
+  box-shadow: var(--ud-shadow-sm);
+}
+.university-dashboard .ud-btn-primary {
+  background: color-mix(in srgb, var(--text-accent) 16%, var(--background-modifier-form-field));
+  border-color: color-mix(in srgb, var(--text-accent) 35%, var(--background-modifier-border));
+}
+
+.university-dashboard .ud-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0 18px;
+  padding: 10px 12px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 14px;
+  background: var(--background-modifier-form-field);
+}
+.theme-dark .university-dashboard .ud-search {
+  background: rgba(255,255,255,0.035);
+  border-color: rgba(255,255,255,0.06);
+}
+.university-dashboard .ud-search input {
+  width: 100%;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  color: var(--text-normal);
+  font: 500 var(--ud-text-base)/1.2 var(--ud-font-sans);
+}
+.university-dashboard .ud-search input::placeholder { color: var(--text-faint); }
+
+.university-dashboard .ud-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.university-dashboard .ud-block { margin: 12px 0; }
+.university-dashboard .ud-done-toggle {
+  border-left: 3px solid var(--ud-color, var(--background-modifier-border));
+}
+.university-dashboard .ud-card {
+  min-height: 54px;
+}
+.university-dashboard .ud-card-tag {
+  max-width: 210px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.university-dashboard .ud-pill-ok {
+  background: rgba(48, 209, 88, 0.12);
+  color: var(--ud-status-ok);
+}
+.theme-dark .university-dashboard .ud-pill-ok {
+  background: rgba(105, 219, 124, 0.15);
+}
+
+@media (max-width: 760px) {
+  .university-dashboard .ud-hero {
+    grid-template-columns: 1fr;
+  }
+  .university-dashboard .ud-grid-2,
+  .university-dashboard .ud-stat-grid {
+    grid-template-columns: 1fr;
+  }
+  .university-dashboard .ud-action-row .ud-btn {
+    flex: 1 1 180px;
+  }
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   ENTERPRISE UI PATCH v7
+   Строгий корпоративный слой: без emoji, без внешних иконочных шрифтов,
+   с улучшенными переносами, стабильными сетками и аккуратными actions.
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.university-dashboard,
+.dv-container:has(.ud-card) {
+  --ud-radius-sm: 6px;
+  --ud-radius-md: 10px;
+  --ud-radius-lg: 16px;
+  --ud-border-subtle: color-mix(in srgb, var(--text-muted) 16%, transparent);
+  --ud-surface-1: color-mix(in srgb, var(--background-primary) 88%, var(--text-normal) 3%);
+  --ud-surface-2: color-mix(in srgb, var(--background-primary) 82%, var(--text-normal) 6%);
+  --ud-focus-ring: color-mix(in srgb, var(--text-accent) 45%, transparent);
+}
+
+.theme-dark .university-dashboard,
+.theme-dark .dv-container:has(.ud-card) {
+  --ud-border-subtle: rgba(255,255,255,0.08);
+  --ud-surface-1: rgba(255,255,255,0.035);
+  --ud-surface-2: rgba(255,255,255,0.055);
+}
+
+.university-dashboard.ud-page {
+  max-width: min(1180px, 100%);
+  padding-inline: clamp(2px, 1vw, 10px);
+}
+
+.university-dashboard .ud-hero {
+  grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+  border-radius: 22px;
+  border-color: var(--ud-border-subtle);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--ud-blue) 10%, transparent), transparent 42%),
+    linear-gradient(180deg, var(--ud-surface-2), var(--ud-surface-1));
+  box-shadow: 0 1px 0 rgba(255,255,255,0.05) inset, 0 18px 50px rgba(0,0,0,0.08);
+}
+.theme-dark .university-dashboard .ud-hero {
+  background:
+    linear-gradient(135deg, rgba(94,129,172,0.13), transparent 42%),
+    linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.025));
+}
+.university-dashboard .ud-hero h1 {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.university-dashboard .ud-hero p {
+  color: var(--text-muted);
+  max-width: 68ch;
+}
+
+.university-dashboard .ud-stat-grid {
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+}
+.university-dashboard .ud-stat {
+  border-color: var(--ud-border-subtle);
+  background: var(--ud-surface-1);
+  min-width: 0;
+}
+.university-dashboard .ud-stat strong,
+.university-dashboard .ud-stat span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.university-dashboard .ud-btn {
+  min-height: 40px;
+  max-width: 100%;
+  border-radius: 999px;
+  border-color: var(--ud-border-subtle);
+  background: var(--ud-surface-1);
+  letter-spacing: 0.005em;
+  white-space: nowrap;
+}
+.university-dashboard .ud-btn-primary {
+  background: color-mix(in srgb, var(--text-accent) 18%, var(--ud-surface-1));
+  border-color: color-mix(in srgb, var(--text-accent) 35%, var(--ud-border-subtle));
+}
+.university-dashboard .ud-symbol {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 22px;
+  background: color-mix(in srgb, currentColor 11%, transparent);
+  color: var(--text-accent);
+  font: 750 0.68rem/1 var(--ud-font-sans);
+  letter-spacing: 0.04em;
+}
+.university-dashboard .ud-btn-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.university-dashboard .ud-search {
+  border-color: var(--ud-border-subtle);
+  background: var(--ud-surface-1);
+  min-width: 0;
+}
+.university-dashboard .ud-search-label {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  font-size: var(--ud-text-xs);
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding-right: 4px;
+}
+
+.university-dashboard .ud-section {
+  align-items: center;
+  min-width: 0;
+  border-bottom: 1px solid var(--ud-border-subtle);
+  padding-bottom: 10px;
+}
+.university-dashboard .ud-section-dot { display: none; }
+.university-dashboard .ud-section-line {
+  width: 28px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--ud-color, var(--text-muted));
+  flex: 0 0 28px;
+}
+.university-dashboard .ud-section-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.university-dashboard .ud-section-count {
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+.university-dashboard .ud-quick-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.university-dashboard .ud-quick-card {
+  align-items: flex-start;
+  min-width: 0;
+  min-height: 112px;
+  padding: 18px;
+  border-radius: 18px;
+  border-color: var(--ud-border-subtle);
+  background: var(--ud-surface-1);
+}
+.university-dashboard .ud-quick-card:hover {
+  transform: translateY(-2px);
+}
+.university-dashboard .ud-quick-code {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 28px;
+  border-radius: 9px;
+  color: var(--ud-accent, var(--text-accent));
+  background: color-mix(in srgb, var(--ud-accent, var(--text-accent)) 12%, transparent);
+  font: 800 0.75rem/1 var(--ud-font-sans);
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+}
+.university-dashboard .ud-quick-card .ud-icon { display: none !important; }
+.university-dashboard .ud-quick-label {
+  color: var(--text-normal);
+  font-size: 0.98rem;
+  line-height: 1.25;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.university-dashboard .ud-list { min-width: 0; }
+.university-dashboard .ud-card {
+  min-width: 0;
+  border-color: var(--ud-border-subtle);
+  background: var(--ud-surface-1);
+  align-items: center;
+}
+.university-dashboard .ud-card:hover {
+  transform: translateY(-1px);
+}
+.university-dashboard .ud-card-main {
+  min-width: 0;
+}
+.university-dashboard .ud-card-link {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.university-dashboard .ud-card-meta {
+  min-width: 0;
+  row-gap: 4px;
+}
+.university-dashboard .ud-card-tag {
+  max-width: min(260px, 100%);
+  min-width: 0;
+  text-transform: none;
+  letter-spacing: 0.015em;
+}
+.university-dashboard .ud-date-block,
+.university-dashboard .ud-status-block {
+  flex: 0 0 auto;
+}
+
+.university-dashboard .ud-schedule-nav,
+.sirius-modal .ud-schedule-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 16px;
+}
+.sirius-modal .ud-schedule-btn {
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-modifier-form-field);
+  color: var(--text-normal);
+  border-radius: 999px;
+  padding: 7px 12px;
+  font: 650 0.86rem/1.2 var(--font-interface);
+  cursor: pointer;
+}
+.sirius-modal .ud-schedule-btn:hover {
+  background: var(--background-modifier-hover);
+  border-color: var(--text-muted);
+}
+.sirius-modal .sirius-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: var(--text-muted);
+  font-size: 0.85em;
+}
+.sirius-modal .sirius-meta-label {
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.72em;
+  font-weight: 700;
+  margin-right: 4px;
+}
+
+@media (max-width: 860px) {
+  .university-dashboard .ud-quick-grid,
+  .university-dashboard .ud-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 560px) {
+  .university-dashboard .ud-hero,
+  .university-dashboard .ud-stat-grid,
+  .university-dashboard .ud-quick-grid,
+  .university-dashboard .ud-grid-2 {
+    grid-template-columns: 1fr;
+  }
+  .university-dashboard .ud-btn {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .university-dashboard .ud-card {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .university-dashboard .ud-date-block,
+  .university-dashboard .ud-status-block {
+    text-align: left;
+    min-width: auto;
+  }
+}

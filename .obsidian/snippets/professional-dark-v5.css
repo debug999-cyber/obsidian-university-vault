@@ -1,0 +1,280 @@
+/* ═════════════════════════════════════════════════════════════════════════════
+   PROFESSIONAL DARK v5 — System-First Theme
+   ---------------------------------------------------------------------------
+   Назначение:  Базовая тёмная тема для Obsidian.
+                Не использует !important. Работает через CSS-переменные.
+                Совместима с University Dashboard System.
+
+   Настройки:   Все параметры доступны через Style Settings (плагин)
+                благодаря блоку @settings в начале файла.
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+/* @settings
+name: Professional Dark
+id: professional-dark
+settings:
+    -
+        id: pd-heading-colors
+        title: Colors
+        type: heading
+        level: 2
+    -
+        id: pd-bg-base
+        title: Background Base
+        type: variable-color
+        format: hex
+        default: '#121212'
+    -
+        id: pd-bg-surface
+        title: Background Surface
+        type: variable-color
+        format: hex
+        default: '#1a1a1a'
+    -
+        id: pd-bg-elevated
+        title: Background Elevated
+        type: variable-color
+        format: hex
+        default: '#222222'
+    -
+        id: pd-border
+        title: Border Color
+        type: variable-color
+        format: hex
+        default: '#2a2a2a'
+    -
+        id: pd-text-primary
+        title: Text Primary
+        type: variable-color
+        format: hex
+        default: '#f0f0f0'
+    -
+        id: pd-text-secondary
+        title: Text Secondary
+        type: variable-color
+        format: hex
+        default: '#a0a0a0'
+    -
+        id: pd-text-muted
+        title: Text Muted
+        type: variable-color
+        format: hex
+        default: '#666666'
+    -
+        id: pd-heading-typography
+        title: Typography
+        type: heading
+        level: 2
+    -
+        id: pd-font-ui
+        title: UI Font
+        type: variable-text
+        default: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    -
+        id: pd-line-height
+        title: Line Height
+        type: variable-number
+        default: 1.6
+        format: em
+*/
+
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   БЛОК 1: CSS-ПЕРЕМЕННЫЕ ТЕМЫ
+   ---------------------------------------------------------------------------
+   Эти переменные перехватываются плагином Style Settings.
+   Если Style Settings не установлен — используются значения по умолчанию.
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --pd-bg-base:      #121212;
+  --pd-bg-surface:   #1a1a1a;
+  --pd-bg-elevated:  #222222;
+  --pd-border:       #2a2a2a;
+  --pd-text-primary: #f0f0f0;
+  --pd-text-secondary:#a0a0a0;
+  --pd-text-muted:   #666666;
+  --pd-font-ui:      "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --pd-line-height:  1.6em;
+}
+
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   БЛОК 2: МАППИНГ НА ПЕРЕМЕННЫЕ OBSIDIAN
+   ---------------------------------------------------------------------------
+   Здесь тема «вживается» в Obsidian: перенаправляем его внутренние
+   CSS-переменные на наши кастомные. Это позволяет всем плагинам
+   (Dataview, Templater и др.) работать в единой цветовой среде.
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.theme-dark {
+  --background-primary:        var(--pd-bg-base);
+  --background-secondary:        var(--pd-bg-surface);
+  --background-modifier-border:  var(--pd-border);
+  --background-modifier-form-field: var(--pd-bg-elevated);
+  --background-modifier-hover:   rgba(255,255,255,0.04);
+
+  --text-normal:  var(--pd-text-primary);
+  --text-muted:   var(--pd-text-secondary);
+  --text-faint:   var(--pd-text-muted);
+  --text-accent:  #88c0d0;
+  --text-accent-hover: #a3be8c;
+
+  --interactive-normal:  var(--pd-bg-elevated);
+  --interactive-hover: rgba(255,255,255,0.06);
+  --interactive-accent: #5e81ac;
+
+  --font-interface: var(--pd-font-ui);
+  --font-text:      var(--pd-font-ui);
+}
+
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   БЛОК 3: ТИПОГРАФИКА
+   ---------------------------------------------------------------------------
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.theme-dark .markdown-preview-view {
+  padding: 24px 32px;
+  line-height: var(--pd-line-height);
+}
+
+/* Заголовок H1 — главный титул страницы */
+.theme-dark .markdown-preview-view h1 {
+  font-weight: 700;
+  font-size: 1.6em;
+  letter-spacing: -0.02em;
+  color: var(--pd-text-primary);
+  border-bottom: 1px solid var(--pd-border);
+  padding-bottom: 12px;
+  margin-bottom: 24px;
+  margin-top: 0;
+}
+
+/* Заголовок H2 — секционные заголовки (uppercase для различимости) */
+.theme-dark .markdown-preview-view h2 {
+  font-weight: 600;
+  font-size: 1.05em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--pd-text-secondary);
+  margin-top: 40px;
+  margin-bottom: 12px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--pd-border);
+}
+
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   БЛОК 4: ССЫЛКИ
+   ---------------------------------------------------------------------------
+   Внутренние (вики-ссылки) и внешние — разные стили для различимости.
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+/* Внутренние ссылки [[...]] */
+.theme-dark .internal-link {
+  color: var(--pd-text-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 1px solid transparent;
+  transition: all 0.15s ease;
+}
+.theme-dark .internal-link:hover {
+  color: var(--pd-text-primary);
+  border-bottom-color: var(--pd-text-muted);
+}
+
+/* Внешние ссылки http://... */
+.theme-dark .external-link {
+  color: var(--pd-text-muted);
+  text-decoration: none;
+  border-bottom: 1px solid var(--pd-border);
+  transition: all 0.15s ease;
+}
+.theme-dark .external-link:hover {
+  color: var(--pd-text-secondary);
+  border-bottom-color: var(--pd-text-secondary);
+}
+
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   БЛОК 5: DATAVIEW ТАБЛИЦЫ
+   ---------------------------------------------------------------------------
+   Скрываем заголовки таблиц Dataview, делаем строки компактными.
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.theme-dark .dataview.table-view-table,
+.theme-dark table.dataview {
+  width: 100%;
+  border-collapse: collapse;
+  background: transparent;
+  border: none;
+  margin: 8px 0 24px 0;
+  font-size: 0.85em;
+}
+.theme-dark .dataview.table-view-table thead,
+.theme-dark table.dataview thead {
+  display: none;
+}
+.theme-dark .dataview.table-view-table td,
+.theme-dark table.dataview td {
+  padding: 6px 0;
+  color: var(--pd-text-secondary);
+  border-bottom: 1px solid var(--pd-border);
+  vertical-align: middle;
+  transition: color 0.15s ease;
+}
+.theme-dark .dataview.table-view-table tr:last-child td,
+.theme-dark table.dataview tr:last-child td {
+  border-bottom: none;
+}
+.theme-dark .dataview.table-view-table tbody tr:hover td,
+.theme-dark table.dataview tbody tr:hover td {
+  color: var(--pd-text-primary);
+  background: transparent;
+}
+
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   БЛОК 6: СПИСКИ И ЦИТАТЫ
+   ---------------------------------------------------------------------------
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.theme-dark .markdown-preview-view ul {
+  padding-left: 20px;
+  margin: 8px 0 24px 0;
+}
+.theme-dark .markdown-preview-view li {
+  margin-bottom: 4px;
+  color: var(--pd-text-secondary);
+}
+
+/* Блокquote — тонкая левая рамка, без курсива */
+.theme-dark blockquote {
+  border-left: 2px solid var(--pd-border);
+  color: var(--pd-text-muted);
+  padding-left: 16px;
+  margin: 16px 0;
+  font-style: normal;
+}
+
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   БЛОК 7: БОКОВАЯ ПАНЕЛЬ (File Explorer)
+   ---------------------------------------------------------------------------
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.theme-dark .nav-folder-title {
+  font-weight: 500;
+  font-size: 0.85em;
+  color: var(--pd-text-secondary);
+}
+.theme-dark .nav-file-title {
+  font-size: 0.82em;
+  color: var(--pd-text-muted);
+  transition: all 0.15s ease;
+}
+.theme-dark .nav-file-title.is-active {
+  color: var(--pd-text-primary);
+  background: rgba(255,255,255,0.03);
+}

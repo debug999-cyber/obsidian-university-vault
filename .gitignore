@@ -1,0 +1,33 @@
+# Медиафайлы (тяжёлые)
+*.png
+*.jpg
+*.m4a
+*.mp3
+*.mp4
+
+# Whisper модели (огромные!)
+.obsidian/plugins/audio-transcription/models/
+.obsidian/plugins/audio-transcription/bin/
+
+# Системное
+.obsidian/workspace.json
+.trash/
+.space/
+
+
+# OS metadata / editor noise
+.DS_Store
+._*
+Thumbs.db
+
+# Obsidian local workspace state
+.obsidian/workspace-mobile.json
+.obsidian/workspace.json
+
+# Python / tooling
+__pycache__/
+*.pyc
+.venv/
+
+# Generated health reports can be recreated (keep markdown report if desired)
+50-Система/Отчёты/*.json

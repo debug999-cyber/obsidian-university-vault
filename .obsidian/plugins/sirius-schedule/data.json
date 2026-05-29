@@ -1,0 +1,11 @@
+{
+  "jsonPath": "sirius-schedule.json",
+  "groupName": "К0709-25/1",
+  "autoUpdateOnStart": true,
+  "autoFetchOnStart": true,
+  "updateOnStartMaxAgeHours": 12,
+  "showNotifications": true,
+  "cachePath": "sirius-schedule-cache.json",
+  "pythonPath": "python",
+  "scriptPath": "sirius-update.py"
+}
