@@ -1,0 +1,9 @@
+{
+    "id": "sirius-schedule",
+    "name": "Sirius Schedule",
+    "version": "3.0.0",
+    "minAppVersion": "0.15.0",
+    "description": "Расписание Сириуса из JSON",
+    "author": "User",
+    "isDesktopOnly": false
+}

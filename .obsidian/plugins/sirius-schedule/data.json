@@ -1,0 +1,7 @@
+{
+  "jsonPath": "sirius-schedule.json",
+  "groupName": "К0709-25/1",
+  "autoUpdateOnStart": true,
+  "showNotifications": true,
+  "cachePath": "sirius-schedule-cache.json"
+}

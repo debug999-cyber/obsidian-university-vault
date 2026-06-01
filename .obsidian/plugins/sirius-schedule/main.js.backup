@@ -1,0 +1,221 @@
+const { Plugin, Notice, moment, Setting, PluginSettingTab, Modal } = require('obsidian');
+
+const DEFAULT_SETTINGS = {
+    jsonPath: 'sirius-schedule.json',
+    groupName: ''
+};
+
+class SiriusSchedulePlugin extends Plugin {
+    async onload() {
+        await this.loadSettings();
+        this.cache = new Map();
+        this.calendar = new CalendarIntegration(this);
+        
+        await this.loadFromJson();
+        this.calendar.register();
+        
+        this.registerCommands();
+        this.registerRibbon();
+        this.registerSettings();
+    }
+
+    async loadSettings() {
+        this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    }
+
+    async saveSettings() {
+        await this.saveData(this.settings);
+    }
+
+    registerCommands() {
+        this.addCommand({
+            id: 'sirius-reload',
+            name: 'Перечитать JSON расписания',
+            callback: () => this.loadFromJson(true)
+        });
+
+        this.addCommand({
+            id: 'sirius-today',
+            name: 'Расписание на сегодня',
+            callback: () => this.showToday()
+        });
+
+        this.addCommand({
+            id: 'sirius-tomorrow',
+            name: 'Расписание на завтра',
+            callback: () => this.showTomorrow()
+        });
+    }
+
+    registerRibbon() {
+        this.addRibbonIcon('refresh-cw', 'Sirius: обновить', () => {
+            this.loadFromJson(true);
+        });
+    }
+
+    registerSettings() {
+        this.addSettingTab(new SiriusSettingTab(this.app, this));
+    }
+
+    async loadFromJson(showNotice = false) {
+        try {
+            const file = this.app.vault.getAbstractFileByPath(this.settings.jsonPath);
+            if (!file) {
+                if (showNotice) new Notice('JSON не найден. Запусти python sirius-update.py', 5000);
+                return false;
+            }
+
+            const content = await this.app.vault.read(file);
+            const data = JSON.parse(content);
+
+            this.cache.clear();
+            for (const [date, lessons] of Object.entries(data.by_date || {})) {
+                this.cache.set(date, lessons);
+            }
+
+            this.settings.groupName = data.group || '';
+            await this.saveSettings();
+            this.refreshCalendar();
+
+            if (showNotice) {
+                new Notice(`Расписание загружено: ${data.total_lessons} пар`, 4000);
+            }
+            return true;
+
+        } catch (e) {
+            if (showNotice) new Notice('Ошибка: ' + e.message, 3000);
+            return false;
+        }
+    }
+
+    refreshCalendar() {
+    // Способ 1: Перезагружаем весь плагин Calendar (рабочий)
+    const calendarPlugin = this.app.plugins.getPlugin('calendar');
+    if (calendarPlugin) {
+        // Закрываем и открываем заново — форсирует перерисовку
+        const leaf = this.app.workspace.getLeavesOfType('calendar')[0];
+        if (leaf) {
+            leaf.detach();
+            this.app.workspace.getRightLeaf(false).setViewState({ type: 'calendar' });
+        }
+    }
+    }
+    
+    showToday() { this.showForDate(moment().format('DD.MM.YYYY'), 'Сегодня'); }
+    showTomorrow() { this.showForDate(moment().add(1, 'day').format('DD.MM.YYYY'), 'Завтра'); }
+
+    showForDate(dateStr, label) {
+        const lessons = this.cache.get(dateStr) || [];
+        if (!lessons.length) {
+            new Notice(`${label}: пар нет 🎉`, 3000);
+            return;
+        }
+
+        class ScheduleModal extends Modal {
+            constructor(app, title, lessons) {
+                super(app);
+                this.title = title;
+                this.lessons = lessons;
+            }
+            
+            onOpen() {
+                const { contentEl } = this;
+                contentEl.createEl('h2', { text: this.title });
+                const container = contentEl.createEl('div');
+                container.style.cssText = 'display:flex;flex-direction:column;gap:8px;margin-top:12px;';
+                
+                for (const l of this.lessons) {
+                    const row = container.createEl('div');
+                    row.style.cssText = 'padding:10px 14px;border-radius:8px;background:var(--background-modifier-form-field);border:1px solid var(--background-modifier-border);';
+                    
+                    const header = row.createEl('div');
+                    header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;';
+                    
+                    const time = header.createEl('span');
+                    time.style.cssText = 'font-weight:700;color:var(--text-accent);';
+                    time.textContent = `${l.start}–${l.end}`;
+                    
+                    const type = header.createEl('span');
+                    type.style.cssText = 'font-size:0.8em;padding:2px 8px;border-radius:4px;background:var(--background-modifier-hover);';
+                    type.textContent = l.type;
+                    
+                    const subject = row.createEl('div');
+                    subject.style.cssText = 'font-weight:600;margin:4px 0;';
+                    subject.textContent = l.subject;
+                    
+                    const meta = row.createEl('div');
+                    meta.style.cssText = 'display:flex;gap:12px;font-size:0.85em;color:var(--text-muted);';
+                    meta.innerHTML = `🏫 ${l.room} | 👤 ${l.teacher || '—'}`;
+                }
+            }
+            
+            onClose() { this.contentEl.empty(); }
+        }
+
+        new ScheduleModal(this.app, `${label} — ${dateStr}`, lessons).open();
+    }
+}
+
+class CalendarIntegration {
+    constructor(plugin) { this.plugin = plugin; }
+
+    register() {
+        const calendarPlugin = this.plugin.app.plugins.getPlugin('calendar');
+        if (!calendarPlugin) { console.warn('Calendar not found'); return false; }
+
+        this.plugin.registerEvent(
+            this.plugin.app.workspace.on('calendar:render-day', (date, el) => {
+                this.renderDot(date, el);
+            })
+        );
+        return true;
+    }
+
+    renderDot(date, el) {
+        const dateStr = date.format('DD.MM.YYYY');
+        const lessons = this.plugin.cache.get(dateStr) || [];
+        if (!lessons.length) return;
+
+        let color = '#5e81ac';
+        if (lessons.some(l => l.type?.includes('Экзамен'))) color = '#bf616a';
+        else if (lessons.some(l => l.type?.includes('Практика'))) color = '#d08770';
+
+        const dot = el.createEl('div');
+        dot.style.cssText = `width:6px;height:6px;border-radius:50%;background:${color};position:absolute;bottom:2px;left:50%;transform:translateX(-50%);box-shadow:0 0 4px ${color}40;`;
+        dot.title = lessons.map(l => `${l.start} ${l.subject}`).join('\n');
+    }
+}
+
+class SiriusSettingTab extends PluginSettingTab {
+    constructor(app, plugin) {
+        super(app, plugin);
+        this.plugin = plugin;
+    }
+
+    display() {
+        const { containerEl } = this;
+        containerEl.empty();
+        containerEl.createEl('h2', { text: 'Sirius Schedule' });
+
+        new Setting(containerEl)
+            .setName('Путь к JSON')
+            .addText(text => text
+                .setValue(this.plugin.settings.jsonPath)
+                .onChange(async (v) => { this.plugin.settings.jsonPath = v; await this.plugin.saveSettings(); }));
+
+        new Setting(containerEl)
+            .setName('Обновить')
+            .addButton(btn => btn.setButtonText('Обновить').setCta()
+                .onClick(() => this.plugin.loadFromJson(true)));
+
+        const status = containerEl.createEl('div');
+        status.style.cssText = 'margin-top:16px;padding:12px;border-radius:8px;background:var(--background-modifier-form-field);';
+        const file = this.plugin.app.vault.getAbstractFileByPath(this.plugin.settings.jsonPath);
+        status.innerHTML = file 
+            ? `✅ JSON найден<br>Группа: ${this.plugin.settings.groupName || '—'}`
+            : '❌ JSON не найден. Запусти python sirius-update.py';
+        status.style.color = file ? 'var(--text-accent)' : 'var(--text-error)';
+    }
+}
+
+module.exports = SiriusSchedulePlugin;
