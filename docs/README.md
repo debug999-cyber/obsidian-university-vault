@@ -1,6 +1,7 @@
 # Documentation Index
 
-**Current project version:** `v1.1.0`
+**Project name:** `Студпортал Vault`  
+**Current project version:** `v1.1.1`
 
 This folder explains how the vault works and where to change it safely.
 

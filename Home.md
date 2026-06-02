@@ -710,7 +710,7 @@ const footer = page.createEl("footer", { cls: "ud-footer" });
 footer.createEl("div", { cls: "ud-footer-divider" });
 footer.createEl("div", {
   cls: "ud-footer-text",
-  text: `Obsidian University Vault • ${overdueCount} ${plural(overdueCount, ["просрочка", "просрочки", "просрочек"])} • стабильный layout`
+  text: `Студпортал Vault • ${overdueCount} ${plural(overdueCount, ["просрочка", "просрочки", "просрочек"])} • стабильный layout`
 });
 
 const fabWrap = shell.createEl("div", { cls: "ud-fab-wrap" });

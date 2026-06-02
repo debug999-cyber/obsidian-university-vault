@@ -1,6 +1,7 @@
 # 01 — Start here
 
-**Current project version:** `v1.1.0`
+**Project name:** `Студпортал Vault`  
+**Current project version:** `v1.1.1`
 
 Этот документ нужен человеку, который впервые открыл проект и хочет быстро запустить его без чтения всего vault.
 
