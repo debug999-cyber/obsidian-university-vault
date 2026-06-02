@@ -1,5 +1,7 @@
 # Documentation Index
 
+**Current project version:** `v1.1.0`
+
 This folder explains how the vault works and where to change it safely.
 
 If you are here for the first time, use the docs in this order:
@@ -37,7 +39,8 @@ If you are here for the first time, use the docs in this order:
 ### Something is broken
 - `08-TROUBLESHOOTING.md`
 
-### I want project history
+### I want project history or current version
+- `../VERSION`
 - `../CHANGELOG.md`
 
 ---

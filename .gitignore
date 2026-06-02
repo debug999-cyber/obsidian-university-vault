@@ -13,6 +13,19 @@
 .obsidian/workspace.json
 .trash/
 .space/
+.DS_Store
+._*
+**/._*
+
+# Временные и резервные файлы
+*.backup
+*.bak
+*.tmp
+*.temp
+Untitled*.md
+Без названия*.md
+.md
+Home-auto-moc.md
 
 # Личные данные — ВАЖНО!
 30-Личное/Разное/2026-05-24 — Почта и пароль от стим.md

@@ -36,8 +36,15 @@ const SUBJECT_ICONS = {
 
 const shell = root.createEl("div", { cls: "ud-shell" });
 const themeStorageKey = "ud-shell-theme";
-const systemTheme = document.body.classList.contains("theme-dark") ? "dark" : "light";
+const OBSIDIAN_BASE_THEMES = {
+  light: "moonstone",
+  dark: "obsidian"
+};
+const THEME_TRANSITION_DURATION = 560;
+const THEME_TRANSITION_STYLE_ID = "ud-global-theme-transition-style";
 let themeToggle = null;
+let isThemeSwitching = false;
+let themeTransitionTimeout = null;
 
 function plural(number, forms) {
   const abs = Math.abs(number) % 100;
@@ -94,11 +101,137 @@ function makeInteractive(element, handler, ariaLabel = "Открыть") {
   });
 }
 
+function normalizeTheme(theme) {
+  return theme === "dark" ? "dark" : "light";
+}
+
+function getWorkspaceTheme() {
+  if (document.body.classList.contains("theme-dark")) return "dark";
+  if (document.body.classList.contains("theme-light")) return "light";
+
+  const appTheme = typeof app?.getTheme === "function" ? app.getTheme() : null;
+  if (appTheme === OBSIDIAN_BASE_THEMES.dark) return "dark";
+  if (appTheme === OBSIDIAN_BASE_THEMES.light) return "light";
+
+  return window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ? "dark" : "light";
+}
+
 function setShellTheme(theme) {
-  shell.setAttribute("data-ud-theme", theme);
-  localStorage.setItem(themeStorageKey, theme);
+  const normalizedTheme = normalizeTheme(theme);
+  const nextTheme = normalizedTheme === "dark" ? "light" : "dark";
+
+  shell.setAttribute("data-ud-theme", normalizedTheme);
+  localStorage.setItem(themeStorageKey, normalizedTheme);
+
   if (themeToggle) {
-    themeToggle.setAttribute("aria-pressed", theme === "dark" ? "true" : "false");
+    themeToggle.setAttribute("aria-pressed", normalizedTheme === "dark" ? "true" : "false");
+    themeToggle.setAttribute("aria-label", `Переключить весь Obsidian на ${nextTheme === "dark" ? "тёмную" : "светлую"} тему`);
+    themeToggle.setAttribute("title", `Сейчас ${normalizedTheme === "dark" ? "тёмная" : "светлая"} тема. Нажмите, чтобы включить ${nextTheme === "dark" ? "тёмную" : "светлую"}.`);
+  }
+}
+
+function ensureThemeTransitionStyle() {
+  if (document.getElementById(THEME_TRANSITION_STYLE_ID)) return;
+
+  const style = document.createElement("style");
+  style.id = THEME_TRANSITION_STYLE_ID;
+  style.textContent = `
+    html.ud-theme-transitioning,
+    body.ud-theme-transitioning,
+    body.ud-theme-transitioning .app-container,
+    body.ud-theme-transitioning .workspace,
+    body.ud-theme-transitioning .workspace-ribbon,
+    body.ud-theme-transitioning .workspace-tabs,
+    body.ud-theme-transitioning .workspace-tab-header,
+    body.ud-theme-transitioning .workspace-split,
+    body.ud-theme-transitioning .workspace-leaf,
+    body.ud-theme-transitioning .workspace-leaf-content,
+    body.ud-theme-transitioning .view-header,
+    body.ud-theme-transitioning .view-content,
+    body.ud-theme-transitioning .markdown-preview-view,
+    body.ud-theme-transitioning .markdown-source-view,
+    body.ud-theme-transitioning .cm-editor,
+    body.ud-theme-transitioning .cm-scroller,
+    body.ud-theme-transitioning .modal,
+    body.ud-theme-transitioning .prompt,
+    body.ud-theme-transitioning .menu,
+    body.ud-theme-transitioning .popover,
+    body.ud-theme-transitioning .status-bar,
+    body.ud-theme-transitioning .nav-folder-title,
+    body.ud-theme-transitioning .nav-file-title,
+    body.ud-theme-transitioning .tree-item-self,
+    body.ud-theme-transitioning .setting-item,
+    body.ud-theme-transitioning .titlebar,
+    body.ud-theme-transitioning .ud-shell,
+    body.ud-theme-transitioning .ud-shell *,
+    body.ud-theme-transitioning *::before,
+    body.ud-theme-transitioning *::after {
+      transition-property: background-color, border-color, color, fill, stroke, box-shadow, text-shadow, opacity, filter !important;
+      transition-duration: ${THEME_TRANSITION_DURATION}ms !important;
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    body.ud-theme-transitioning .cm-cursor,
+    body.ud-theme-transitioning .cm-dropCursor,
+    body.ud-theme-transitioning .workspace-leaf-resize-handle {
+      transition: none !important;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+function startGlobalThemeTransition() {
+  ensureThemeTransitionStyle();
+  window.clearTimeout(themeTransitionTimeout);
+
+  document.documentElement.classList.add("ud-theme-transitioning");
+  document.body.classList.add("ud-theme-transitioning");
+
+  // Принудительно применяем transition-класс до смены CSS-переменных Obsidian.
+  void document.body.offsetHeight;
+
+  themeTransitionTimeout = window.setTimeout(() => {
+    document.documentElement.classList.remove("ud-theme-transitioning");
+    document.body.classList.remove("ud-theme-transitioning");
+  }, THEME_TRANSITION_DURATION + 180);
+}
+
+async function setWorkspaceTheme(theme, { syncShell = true, smooth = true } = {}) {
+  const normalizedTheme = normalizeTheme(theme);
+  const obsidianTheme = OBSIDIAN_BASE_THEMES[normalizedTheme];
+
+  if (syncShell) {
+    setShellTheme(normalizedTheme);
+  }
+
+  if (smooth) {
+    startGlobalThemeTransition();
+    await new Promise(resolve => requestAnimationFrame(resolve));
+  }
+
+  try {
+    if (typeof app?.changeTheme === "function") {
+      await Promise.resolve(app.changeTheme(obsidianTheme));
+    } else if (typeof app?.updateTheme === "function") {
+      await Promise.resolve(app.updateTheme(obsidianTheme));
+      if (typeof app?.vault?.setConfig === "function") {
+        await Promise.resolve(app.vault.setConfig("theme", obsidianTheme));
+      }
+    } else {
+      document.body.classList.toggle("theme-dark", normalizedTheme === "dark");
+      document.body.classList.toggle("theme-light", normalizedTheme === "light");
+      if (typeof Notice === "function") {
+        new Notice("Тема переключена только визуально: API Obsidian changeTheme недоступен");
+      }
+    }
+
+    requestAnimationFrame(() => setShellTheme(getWorkspaceTheme()));
+  } catch (error) {
+    console.error("UD theme toggle error", error);
+    setShellTheme(getWorkspaceTheme());
+    if (typeof Notice === "function") {
+      new Notice("Не удалось переключить тему Obsidian");
+    }
   }
 }
 
@@ -368,7 +501,7 @@ function registerSearch(groupName, element, text) {
   });
 }
 
-const savedTheme = localStorage.getItem(themeStorageKey) || systemTheme;
+const savedTheme = getWorkspaceTheme();
 setShellTheme(savedTheme);
 
 const topBar = shell.createEl("div", { cls: "ud-top-bar" });
@@ -385,7 +518,7 @@ themeToggle = topBarInner.createEl("button", {
   cls: "ud-theme-toggle ud-focus-ring",
   attr: {
     type: "button",
-    "aria-label": "Переключить тему рабочего стола"
+    "aria-label": "Переключить тему Obsidian"
   }
 });
 themeToggle.createEl("span", { cls: "ud-theme-glow" });
@@ -394,12 +527,41 @@ createIcon(themeToggle, "dark_mode", "ud-icon ud-track-icon ud-track-moon");
 themeToggle.createEl("span", { cls: "ud-theme-knob" });
 setShellTheme(savedTheme);
 
-themeToggle.addEventListener("click", () => {
+themeToggle.addEventListener("click", async () => {
+  if (isThemeSwitching) return;
+
   const nextTheme = shell.getAttribute("data-ud-theme") === "dark" ? "light" : "dark";
+  isThemeSwitching = true;
+
+  // Кнопка анимируется как раньше, а весь интерфейс Obsidian получает временный
+  // transition-класс перед сменой темы, поэтому цвета не прыгают резко.
   setShellTheme(nextTheme);
   themeToggle.classList.add("active");
-  setTimeout(() => themeToggle.classList.remove("active"), 500);
+
+  await setWorkspaceTheme(nextTheme, { syncShell: false, smooth: true });
+
+  window.setTimeout(() => {
+    themeToggle.classList.remove("active");
+    isThemeSwitching = false;
+  }, THEME_TRANSITION_DURATION);
 });
+
+const themeObserver = new MutationObserver(() => {
+  if (isThemeSwitching) return;
+
+  const workspaceTheme = getWorkspaceTheme();
+  if (shell.getAttribute("data-ud-theme") !== workspaceTheme) {
+    setShellTheme(workspaceTheme);
+  }
+});
+themeObserver.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+
+const themeObserverCleanup = window.setInterval(() => {
+  if (!root.isConnected) {
+    themeObserver.disconnect();
+    window.clearInterval(themeObserverCleanup);
+  }
+}, 1000);
 
 const page = shell.createEl("div", { cls: "ud-page" });
 

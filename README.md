@@ -1,5 +1,7 @@
 # Obsidian University Vault
 
+**Current version:** `v1.1.0`
+
 Production-ready Obsidian vault for study management, dashboards, structured notes, and maintainable customization.
 
 Built for people who want an academic vault that is not just a folder of notes, but a working system with:
@@ -62,12 +64,13 @@ This vault is organized so that a new person can quickly understand:
 
 If you are opening the project for the first time, follow this order:
 
-1. `00-START.md`
+1. `docs/01-START-HERE.md`
 2. `Home.md`
 3. `docs/03-CHANGE-MAP.md`
 4. `CHANGELOG.md`
 
 This gives you:
+- a quick launch checklist;
 - a visual overview;
 - a working entry point;
 - a map of editable files;
@@ -79,8 +82,7 @@ This gives you:
 
 | File | Purpose |
 |---|---|
-| `00-START.md` | final vault landing page |
-| `START_HERE.md` | fast onboarding |
+| `docs/01-START-HERE.md` | fast onboarding and first checks |
 | `Home.md` | main dashboard |
 | `50-Система/Дашборды/Дедлайны.md` | deadline dashboard |
 | `10-Университет/Университет.md` | academic overview |
@@ -193,6 +195,20 @@ That separation is intentional: it keeps the vault understandable, extensible, a
 
 ---
 
+## Maintenance policy
+
+Starting with `v1.1.0`, every meaningful system change should update:
+- `VERSION` — current project version;
+- `CHANGELOG.md` — what changed and why;
+- relevant files in `docs/` — where the behavior is explained.
+
+Obvious junk files are ignored by `.gitignore`:
+- macOS sidecars `._*` / `.DS_Store`;
+- `Untitled*.md` and `Без названия*.md` scratch notes;
+- temporary backup files such as `*.backup`, `*.bak`, `*.tmp`.
+
+---
+
 ## Recommended next step
 
-Open `00-START.md` inside Obsidian and continue from there.
+Open `docs/01-START-HERE.md`, then `Home.md` inside Obsidian.
