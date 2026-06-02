@@ -40,8 +40,10 @@ const OBSIDIAN_BASE_THEMES = {
   light: "moonstone",
   dark: "obsidian"
 };
-const THEME_TRANSITION_DURATION = 560;
-const THEME_TRANSITION_STYLE_ID = "ud-global-theme-transition-style";
+const THEME_TRANSITION_DURATION = 220;
+const THEME_TOGGLE_ACTIVE_DURATION = 500;
+const THEME_TRANSITION_OVERLAY_ID = "ud-theme-transition-overlay";
+const LEGACY_THEME_TRANSITION_STYLE_ID = "ud-global-theme-transition-style";
 let themeToggle = null;
 let isThemeSwitching = false;
 let themeTransitionTimeout = null;
@@ -130,70 +132,62 @@ function setShellTheme(theme) {
   }
 }
 
-function ensureThemeTransitionStyle() {
-  if (document.getElementById(THEME_TRANSITION_STYLE_ID)) return;
+function removeLegacyThemeTransitionStyle() {
+  const legacyStyle = document.getElementById(LEGACY_THEME_TRANSITION_STYLE_ID);
+  if (legacyStyle) legacyStyle.remove();
+  document.documentElement.classList.remove("ud-theme-transitioning");
+  document.body.classList.remove("ud-theme-transitioning");
+}
 
-  const style = document.createElement("style");
-  style.id = THEME_TRANSITION_STYLE_ID;
-  style.textContent = `
-    html.ud-theme-transitioning,
-    body.ud-theme-transitioning,
-    body.ud-theme-transitioning .app-container,
-    body.ud-theme-transitioning .workspace,
-    body.ud-theme-transitioning .workspace-ribbon,
-    body.ud-theme-transitioning .workspace-tabs,
-    body.ud-theme-transitioning .workspace-tab-header,
-    body.ud-theme-transitioning .workspace-split,
-    body.ud-theme-transitioning .workspace-leaf,
-    body.ud-theme-transitioning .workspace-leaf-content,
-    body.ud-theme-transitioning .view-header,
-    body.ud-theme-transitioning .view-content,
-    body.ud-theme-transitioning .markdown-preview-view,
-    body.ud-theme-transitioning .markdown-source-view,
-    body.ud-theme-transitioning .cm-editor,
-    body.ud-theme-transitioning .cm-scroller,
-    body.ud-theme-transitioning .modal,
-    body.ud-theme-transitioning .prompt,
-    body.ud-theme-transitioning .menu,
-    body.ud-theme-transitioning .popover,
-    body.ud-theme-transitioning .status-bar,
-    body.ud-theme-transitioning .nav-folder-title,
-    body.ud-theme-transitioning .nav-file-title,
-    body.ud-theme-transitioning .tree-item-self,
-    body.ud-theme-transitioning .setting-item,
-    body.ud-theme-transitioning .titlebar,
-    body.ud-theme-transitioning .ud-shell,
-    body.ud-theme-transitioning .ud-shell *,
-    body.ud-theme-transitioning *::before,
-    body.ud-theme-transitioning *::after {
-      transition-property: background-color, border-color, color, fill, stroke, box-shadow, text-shadow, opacity, filter !important;
-      transition-duration: ${THEME_TRANSITION_DURATION}ms !important;
-      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
-    }
-
-    body.ud-theme-transitioning .cm-cursor,
-    body.ud-theme-transitioning .cm-dropCursor,
-    body.ud-theme-transitioning .workspace-leaf-resize-handle {
-      transition: none !important;
-    }
-  `;
-  document.head.appendChild(style);
+function getThemeOverlayColor() {
+  const styles = getComputedStyle(document.body);
+  return (
+    styles.getPropertyValue("--background-primary").trim() ||
+    styles.backgroundColor ||
+    (getWorkspaceTheme() === "dark" ? "#1a1e24" : "#e8ecf0")
+  );
 }
 
 function startGlobalThemeTransition() {
-  ensureThemeTransitionStyle();
+  // Старый вариант делал transition на сотнях/тысячах элементов и мог сильно лагать.
+  // Новый вариант — один лёгкий overlay поверх окна, который плавно исчезает после смены темы.
+  removeLegacyThemeTransitionStyle();
   window.clearTimeout(themeTransitionTimeout);
 
-  document.documentElement.classList.add("ud-theme-transitioning");
-  document.body.classList.add("ud-theme-transitioning");
+  let overlay = document.getElementById(THEME_TRANSITION_OVERLAY_ID);
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = THEME_TRANSITION_OVERLAY_ID;
+    document.body.appendChild(overlay);
+  }
 
-  // Принудительно применяем transition-класс до смены CSS-переменных Obsidian.
-  void document.body.offsetHeight;
+  Object.assign(overlay.style, {
+    position: "fixed",
+    inset: "0",
+    zIndex: "2147483647",
+    pointerEvents: "none",
+    background: getThemeOverlayColor(),
+    opacity: "0.58",
+    transition: "none",
+    willChange: "opacity"
+  });
+
+  void overlay.offsetHeight;
+  return overlay;
+}
+
+function finishGlobalThemeTransition() {
+  const overlay = document.getElementById(THEME_TRANSITION_OVERLAY_ID);
+  if (!overlay) return;
+
+  overlay.style.transition = `opacity ${THEME_TRANSITION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`;
+  requestAnimationFrame(() => {
+    overlay.style.opacity = "0";
+  });
 
   themeTransitionTimeout = window.setTimeout(() => {
-    document.documentElement.classList.remove("ud-theme-transitioning");
-    document.body.classList.remove("ud-theme-transitioning");
-  }, THEME_TRANSITION_DURATION + 180);
+    overlay.remove();
+  }, THEME_TRANSITION_DURATION + 80);
 }
 
 async function setWorkspaceTheme(theme, { syncShell = true, smooth = true } = {}) {
@@ -225,9 +219,11 @@ async function setWorkspaceTheme(theme, { syncShell = true, smooth = true } = {}
       }
     }
 
+    if (smooth) finishGlobalThemeTransition();
     requestAnimationFrame(() => setShellTheme(getWorkspaceTheme()));
   } catch (error) {
     console.error("UD theme toggle error", error);
+    if (smooth) finishGlobalThemeTransition();
     setShellTheme(getWorkspaceTheme());
     if (typeof Notice === "function") {
       new Notice("Не удалось переключить тему Obsidian");
@@ -533,8 +529,8 @@ themeToggle.addEventListener("click", async () => {
   const nextTheme = shell.getAttribute("data-ud-theme") === "dark" ? "light" : "dark";
   isThemeSwitching = true;
 
-  // Кнопка анимируется как раньше, а весь интерфейс Obsidian получает временный
-  // transition-класс перед сменой темы, поэтому цвета не прыгают резко.
+  // Кнопка анимируется как раньше, а весь интерфейс Obsidian прикрывается
+  // лёгким overlay-fade. Это не нагружает тысячи элементов CSS transition-ами.
   setShellTheme(nextTheme);
   themeToggle.classList.add("active");
 
@@ -543,7 +539,7 @@ themeToggle.addEventListener("click", async () => {
   window.setTimeout(() => {
     themeToggle.classList.remove("active");
     isThemeSwitching = false;
-  }, THEME_TRANSITION_DURATION);
+  }, THEME_TOGGLE_ACTIVE_DURATION);
 });
 
 const themeObserver = new MutationObserver(() => {

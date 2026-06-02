@@ -85,16 +85,16 @@
 - `getWorkspaceTheme()` — определяет текущую тему Obsidian;
 - `setShellTheme()` — синхронизирует визуальное состояние кнопки и dashboard;
 - `setWorkspaceTheme()` — вызывает API Obsidian (`app.changeTheme`) для смены темы;
-- `startGlobalThemeTransition()` — временно включает плавный transition для интерфейса Obsidian.
+- `startGlobalThemeTransition()` — создаёт лёгкий overlay-fade поверх окна перед сменой темы.
 
 Используемые базовые темы Obsidian:
 - `moonstone` → светлая тема;
 - `obsidian` → тёмная тема.
 
-Для мягкой смены цветов создаётся временный CSS-класс:
-- `ud-theme-transitioning`
+Для мягкой смены цветов используется временный overlay:
+- `ud-theme-transition-overlay`
 
-Он применяется к `html` и `body` на время перехода, чтобы фон, текст, рамки, панели и карточки менялись плавно.
+Это один fixed-элемент поверх окна, который быстро исчезает после смены темы. Такой подход заметно легче, чем CSS transition на всех элементах интерфейса, и не должен подвешивать Obsidian.
 
 ## Что менять, если нужен другой стиль
 

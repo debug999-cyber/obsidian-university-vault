@@ -1,7 +1,7 @@
 # Студпортал Vault
 
 **Project name:** `Студпортал Vault`  
-**Current version:** `v1.1.1`  
+**Current version:** `v1.1.2`  
 **Previous name:** `Obsidian University Vault`
 
 Production-ready Obsidian vault for study management, dashboards, structured notes, and maintainable customization.
