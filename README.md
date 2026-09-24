@@ -1,21 +1,17 @@
-# 📚 University Vault · Obsidian
+# Университетская база знаний (Obsidian)
 
-> Моя университетская база знаний: **конспекты, дашборды и тесты** в одном месте.
+Хранилище для учёбы в Obsidian: конспекты, сводки и материалы для самопроверки в одном месте.
 
-![Obsidian](https://img.shields.io/badge/Obsidian-7C3AED?style=flat-square&logo=obsidian&logoColor=white)
-![Knowledge](https://img.shields.io/badge/тип-база%20знаний-3FD0FF?style=flat-square)
+## Что внутри
+- Конспекты и материалы по предметам
+- Дашборды со сводками (Dataview)
+- Заметки для подготовки к тестам
+- Настроенные плагины (Dataview, Tasks, Calendar и другие) уже в репозитории
 
-## 🗂 Внутри
-- **База знаний** — конспекты и материалы по предметам
-- **Дашборды** — сводки на Dataview
-- **Тесты** — вопросы для самопроверки
-- Плагины: Dataview, Tasks, Calendar, Make.md, Modal Forms и др. (уже в репозитории)
-
-## 🚀 Как открыть
+## Как открыть
 ```bash
 git clone https://github.com/debug999-cyber/obsidian-university-vault.git
 ```
-Затем в Obsidian → **Open folder as vault** → выбрать папку.
+Затем в Obsidian: **Open folder as vault** и выбрать папку.
 
----
-<sub>Личное хранилище для учёбы</sub>
+Личное хранилище для учёбы.
